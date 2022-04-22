@@ -1,0 +1,24 @@
+{
+  "name": "wp-forge/wp-network-post-sharing",
+  "description": "A library to enable sharing of posts across network sites.",
+  "type": "library",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Micah Wood",
+      "email": "micah@wpscholar.com",
+      "homepage": "https://wpscholar.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "WP_Forge\\WP_Network_Post_Sharing\\": "includes"
+    },
+    "files": [
+      "includes/functions.php",
+    ]
+  },
+  "require": {
+    "php": ">=7.0"
+  }
+}
