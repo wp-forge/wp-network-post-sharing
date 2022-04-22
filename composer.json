@@ -15,7 +15,7 @@
       "WP_Forge\\WP_Network_Post_Sharing\\": "includes"
     },
     "files": [
-      "includes/functions.php",
+      "includes/functions.php"
     ]
   },
   "require": {
