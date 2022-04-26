@@ -51,6 +51,17 @@ function wpnfps_update_postmeta( $meta_id, $object_id, $meta_key, $meta_value ) 
                     update_post_meta( $remote_id, $meta_key, $meta_value );
                     restore_current_blog();
                 }
+
+                /**
+                 * Fires after updating post meta on a remote site
+                 *
+                 * @param int    $object_id The origin object ID
+                 * @param int    $site_id   The remote site ID
+                 * @param int    $remote_id The remote post ID
+                 * @param string $meta_key
+                 * @param mixed  $meta_value
+                 */
+                do_action( 'wpfnps_update_remote_post_meta', $object_id, $site_id, $remote_id, $meta_key, $meta_value );
             }
             add_action( 'update_postmeta', 'wpnfps_update_postmeta', 10, 4 );
         }

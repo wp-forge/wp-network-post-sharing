@@ -1,12 +1,12 @@
 <?php
 
-add_action( 'save_post', 'wpforge_network_post_sharing_save_post' );
+add_action( 'save_post', 'wpfnps_save_post' );
 
 /**
  * @param  int $post_id
  * @return int
  */
-function wpforge_network_post_sharing_save_post( $post_id ) {
+function wpfnps_save_post( $post_id ) {
 
     do {
         if ( defined('DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
@@ -88,8 +88,8 @@ function wpfnps_update_post_share($blog_id, $post_id ) {
 
     if ( $remote_id && ! is_wp_error( $remote_id ) ) {
         if ( $post_images ) {
-            $post_meta['image_gallery'] = array( wpforge_sideload_images( $post_images['gallery'], $remote_id ) );
-            $post_meta['_thumbnail_id'] = wpforge_sideload_images( $post_images['featured'], $remote_id );
+            $post_meta['image_gallery'] = array( wpfnps_sideload_images( $post_images['gallery'], $remote_id ) );
+            $post_meta['_thumbnail_id'] = wpfnps_sideload_images( $post_images['featured'], $remote_id );
         }
 
         wpforge_save_remote_post_meta( $remote_id, $post_meta );
@@ -178,7 +178,7 @@ function wpforge_save_remote_post_meta( $remote_id, $meta ) {
  * @param  string[] $image_urls
  * @return int[]
  */
-function wpforge_sideload_images( $image_urls, $post_id ) {
+function wpfnps_sideload_images($image_urls, $post_id ) {
 
     require_once(ABSPATH . 'wp-admin/includes/media.php');
     require_once(ABSPATH . 'wp-admin/includes/file.php');
@@ -207,5 +207,34 @@ function wpforge_sideload_images( $image_urls, $post_id ) {
     }
 
     return $image_ids;
+
+}
+
+/**
+ * @param  int[]  $image_ids The local image attachment IDs
+ * @param  int    $remote_site_id
+ * @param  int    $remote_post_id
+ * @param  string $meta_key The gallery meta key
+ * @return void
+ */
+function wpfnps_share_image_gallery( $image_ids, $remote_site_id, $remote_post_id, $meta_key ) {
+
+    $image_urls = array();
+
+    foreach( $image_ids as $image_id ) {
+        $image_urls[] = wp_get_attachment_image_url( $image_id, 'full' );
+    }
+
+    if ( $image_urls ) {
+        switch_to_blog( $remote_site_id );
+
+        $remote_image_ids = wpfnps_sideload_images( $image_urls, $remote_post_id );
+
+        if ( $remote_image_ids ) {
+            update_post_meta( $remote_post_id, $meta_key, $remote_image_ids );
+        }
+
+        restore_current_blog();
+    }
 
 }

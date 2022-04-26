@@ -11,7 +11,7 @@ foreach ( new RecursiveIteratorIterator( $iterator ) as $file ) {
  * @param  int   $post_id
  * @return int[]
  */
-function wpfnps_shared_with($post_id = null ) {
+function wpfnps_share_with( $post_id = null ) {
 
     if ( ! $post_id ) {
         $post_id = get_the_ID();
@@ -26,7 +26,7 @@ function wpfnps_shared_with($post_id = null ) {
  */
 function wpfnps_post_types() {
 
-    return wp_parse_args( apply_filters( 'wpforge_network_post_sharing_post_types', array() ) );
+    return $post_types = wp_parse_args( apply_filters( 'wpforge_network_post_sharing_post_types', array() ) );
 
 }
 
@@ -91,5 +91,15 @@ function wpfnps_delete_origin_share_reference( $post_id ) {
         restore_current_blog();
     }
 
+}
+
+/**
+ * @param  int $post_id
+ * @param  int $site_id
+ * @return int
+ */
+function wpfnps_remote_share_id( $post_id, $site_id ) {
+
+    return get_post_meta( $post_id, "_remote_share_id_{$site_id}", 'single' );
 
 }
