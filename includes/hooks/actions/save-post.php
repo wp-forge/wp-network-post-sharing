@@ -1,26 +1,48 @@
 <?php
 
-add_action( 'acf/save_post', 'wpforge_acf_save_post' );
+add_action( 'save_post', 'wpforge_network_post_sharing_save_post' );
 
-function wpforge_acf_save_post( $post_id ) {
+/**
+ * @param  int $post_id
+ * @return int
+ */
+function wpforge_network_post_sharing_save_post( $post_id ) {
 
-    $post_types = apply_filters( 'wpforge_post_sharing_post_types', array() );
+    do {
+        if ( defined('DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+            break;
+        }
 
-    if ( in_array( get_post_type( $post_id ), $post_types ) ) {
-        $share_with = get_field( 'share_with', $post_id );
+        if ( defined('DOING_AJAX' ) ) {
+            break;
+        }
 
-        if ( $share_with ) {
-            remove_action( 'acf/save_post', 'wpforge_acf_save_post' );
+        $post_types = apply_filters( 'wpforge_network_post_sharing_post_types', array() );
 
-            foreach( $share_with as $blog_id ) {
-                if( $blog_id ) {
-                    wpforge_update_post_share( $blog_id, $post_id );
-                }
+
+        if ( in_array( get_post_type( $post_id ), $post_types ) ) {
+
+            if ( ! current_user_can('edit_post', $post_id ) ) {
+                break;
             }
 
-            add_action( 'acf/save_post', 'wpforge_acf_save_post' );
+            $data = filter_input_array( INPUT_POST, array(
+                'wpfnps_share_with' => array(
+                    'filter' => FILTER_VALIDATE_INT,
+                    'flags'  => FILTER_REQUIRE_ARRAY,
+                ),
+            ) );
+
+            if ( $data['wpfnps_share_with'] ) {
+                remove_action( 'save_post', 'wpforge_network_post_sharing_save_post' );
+                update_post_meta( $post_id, '_wpforge_network_post_sharing_share_with', $data['wpfnps_share_with'] );
+                add_action( 'save_post', 'wpforge_network_post_sharing_save_post' );
+            }
         }
-    }
+
+    } while ( false );
+
+    return $post_id;
 
 }
 
