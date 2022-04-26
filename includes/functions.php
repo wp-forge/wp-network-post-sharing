@@ -26,7 +26,7 @@ function wpfnps_shared_with($post_id = null ) {
  */
 function wpfnps_post_types() {
 
-    return $post_types = wp_parse_args( apply_filters( 'wpforge_network_post_sharing_post_types', array() ) );
+    return wp_parse_args( apply_filters( 'wpforge_network_post_sharing_post_types', array() ) );
 
 }
 
