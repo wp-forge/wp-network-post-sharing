@@ -17,11 +17,11 @@ add_action( 'add_meta_boxes', function() {
 function wp_network_post_sharing_meta_box() {
 
     printf( '<label for="wpfnps-share-with">%1$s</label>', __( 'Share with other sites?', 'wpforge_network_post_sharing') );
-    print '<select id="wpfnps-share-with" class="" name="wpfnps_shared_with[]" multiple="multiple" size="5" class="widefat">';
+    print '<select id="wpfnps-share-with" class="" name="wpfnps_share_with[]" multiple="multiple" size="5" class="widefat">';
 
     $sites   = get_sites();
     $current = get_current_blog_id();
-    $shares  = wpfnps_shared_with();
+    $shares  = wpfnps_share_with();
 
     printf( '<option value="0" %2$s>%1$s</option>', __( 'None', 'wpforge_network_post_sharing' ), empty( $shares ) || 0 === $shares[0] ? 'selected="selected"' : '' );
 
