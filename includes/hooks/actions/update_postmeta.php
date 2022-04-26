@@ -1,8 +1,17 @@
 <?php
 
-add_action( 'update_postmeta', function( $meta_id, $object_id, $meta_key, $meta_value ) {
+add_action( 'update_postmeta', 'wpnfps_update_postmeta', 10, 4 );
 
-    if ( 'share_with' === $meta_key ) {
+/**
+ * @param  int    $meta_id
+ * @param  int    $object_id
+ * @param  string $meta_key
+ * @param  string $meta_value
+ * @return void
+ */
+function wpnfps_update_postmeta( $meta_id, $object_id, $meta_key, $meta_value ) {
+
+    if ( '_wpforge_network_post_sharing_share_with' === $meta_key ) {
         $share_with = maybe_unserialize( $meta_value );
         $current_shares = get_field( $meta_key, $object_id );
 
@@ -22,19 +31,20 @@ add_action( 'update_postmeta', function( $meta_id, $object_id, $meta_key, $meta_
 
         foreach( $delete_from as  $maybe_delete ) {
             if ( $maybe_delete && ! in_array( $maybe_delete, $share_with ) ) {
-                wpforge_delete_remote_share( $maybe_delete, $object_id );
+                wpfnps_delete_remote_share( $maybe_delete, $object_id );
                 delete_post_meta( $object_id, "_remote_share_id_{$maybe_delete}" );
             }
         }
     }
-}, 10, 4 );
+
+}
 
 /**
  * @param int $blog_id
  * @param int $object_id
  * @return void
  */
-function wpforge_delete_remote_share($blog_id, $object_id ) {
+function wpfnps_delete_remote_share( $blog_id, $object_id ) {
 
     $remote_post_id = get_post_meta( $object_id, "_remote_share_id_{$blog_id}", 'single' );
     switch_to_blog( $blog_id );
@@ -47,7 +57,7 @@ function wpforge_delete_remote_share($blog_id, $object_id ) {
  * @param $post_id
  * @return void
  */
-function wpforge_delete_remote_images( $post_id ) {
+function wpfnps_delete_remote_images( $post_id ) {
 
     wp_delete_post( get_post_thumbnail_id( $post_id ) );
 

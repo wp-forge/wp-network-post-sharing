@@ -27,15 +27,15 @@ function wpforge_network_post_sharing_save_post( $post_id ) {
             }
 
             $data = filter_input_array( INPUT_POST, array(
-                'wpfnps_share_with' => array(
+                'wpfnps_shared_with' => array(
                     'filter' => FILTER_VALIDATE_INT,
                     'flags'  => FILTER_REQUIRE_ARRAY,
                 ),
             ) );
 
-            if ( $data['wpfnps_share_with'] ) {
+            if ( $data['wpfnps_shared_with'] ) {
                 remove_action( 'save_post', 'wpforge_network_post_sharing_save_post' );
-                update_post_meta( $post_id, '_wpforge_network_post_sharing_share_with', $data['wpfnps_share_with'] );
+                update_post_meta( $post_id, '_wpforge_network_post_sharing_share_with', $data['wpfnps_shared_with'] );
                 add_action( 'save_post', 'wpforge_network_post_sharing_save_post' );
             }
         }
