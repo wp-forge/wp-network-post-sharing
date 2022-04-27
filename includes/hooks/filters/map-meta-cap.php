@@ -4,7 +4,11 @@
  *
  * @link https://developer.wordpress.org/reference/hooks/map_meta_cap/
  */
-add_filter( 'map_meta_cap', function( $caps, $cap, $user_id, $args ) {
+add_filter( 'map_meta_cap', 'wpfnps_map_meta_cap', 10, 4 );
+
+function wpfnps_map_meta_cap( $caps, $cap, $user_id, $args ) {
+
+    remove_filter( 'map_meta_cap', 'wpfnps_map_meta_cap' );
 
     do {
         if ( current_user_can( 'create_sites' ) ) {
@@ -23,6 +27,8 @@ add_filter( 'map_meta_cap', function( $caps, $cap, $user_id, $args ) {
         }
     } while ( false );
 
+    add_filter( 'map_meta_cap', 'wpfnps_map_meta_cap', 10, 4 );
+
     return $caps;
 
-}, 10, 4 );
+}
