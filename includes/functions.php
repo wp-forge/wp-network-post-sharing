@@ -51,14 +51,16 @@ function wpfnps_delete_remote_shares( $post_id ) {
 
     $shared_with = wpfnps_get_shares( $post_id );
 
-    foreach( $shared_with as $site_id ) {
-        $remote_id = get_post_meta( $post_id, "_remote_share_id_{$site_id}", 'single' );
+    if ( is_array( $shared_with ) && $shared_with ) {
+        foreach( $shared_with as $site_id ) {
+            $remote_id = get_post_meta( $post_id, "_remote_share_id_{$site_id}", 'single' );
 
-        if ( $remote_id ) {
-            switch_to_blog($site_id);
-            wpfnps_delete_remote_images( $remote_id );
-            wp_delete_post( $remote_id, "force delete" );
-            restore_current_blog();
+            if ( $remote_id ) {
+                switch_to_blog($site_id);
+                wpfnps_delete_remote_images( $remote_id );
+                wp_delete_post( $remote_id, "force delete" );
+                restore_current_blog();
+            }
         }
     }
 
@@ -84,9 +86,11 @@ function wpfnps_delete_origin_share_reference( $post_id ) {
         $shares = wpfnps_get_shares( $origin_post_id );
 
         // Also remove the blog id from the origin list of shares
-        remove_action( 'update_postmeta', 'wpnfps_update_postmeta' );
-        update_post_meta( $post_id, '_wpforge_network_post_sharing_share_with', array_diff( $shares, array( $site_id ) ) );
-        add_action( 'update_postmeta', 'wpnfps_update_postmeta' );
+        if ( is_array( $shares ) ) {
+            remove_action( 'update_postmeta', 'wpnfps_update_postmeta' );
+            update_post_meta( $post_id, '_wpforge_network_post_sharing_share_with', array_diff( $shares, array( $site_id ) ) );
+            add_action( 'update_postmeta', 'wpnfps_update_postmeta', 10, 4 );
+        }
 
         restore_current_blog();
     }

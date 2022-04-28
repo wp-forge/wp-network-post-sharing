@@ -33,7 +33,7 @@ function wpfnps_save_post( $post_id ) {
                 ),
             ) );
 
-            if ( $data['wpfnps_share_with'] ) {
+            if ( $data && $data['wpfnps_share_with'] ) {
                 remove_action( 'save_post', 'wpforge_network_post_sharing_save_post' );
                 update_post_meta( $post_id, '_wpforge_network_post_sharing_share_with', $data['wpfnps_share_with'] );
                 add_action( 'save_post', 'wpforge_network_post_sharing_save_post' );
@@ -112,6 +112,8 @@ function wpfnps_update_post_share($blog_id, $post_id ) {
  */
 function wpforge_maybe_create_new_remote_listing( $remote_id, $aircraft ) {
 
+    remove_action( 'save_post', 'wpfnps_save_post' );
+
     if ( $remote_id ) {
         //update existing post
         $aircraft['ID'] = $remote_id;
@@ -121,6 +123,8 @@ function wpforge_maybe_create_new_remote_listing( $remote_id, $aircraft ) {
         unset( $aircraft['ID'] );
         $remote_id = wp_insert_post( $aircraft );
     }
+
+    add_action( 'save_post', 'wpfnps_save_post' );
 
     return $remote_id;
 
@@ -163,6 +167,7 @@ function wpforge_save_remote_post_meta( $remote_id, $meta ) {
 
     $exclude = apply_filters( 'wpforge_save_remote_post_meta', array( '_edit_lock', '_edit_last', 'thumbnail_id', 'share_with', '_share_with' ) );
 
+    remove_action( 'update_post_meta', 'wpnfps_update_postmeta' );
     foreach( $meta as $meta_key => $meta_values ) {
         if ( ! in_array( $meta_key, $exclude ) && ! preg_match( '#^_remote_share_id_\d*$#', $meta_key ) ) {
             foreach( $meta_values as $entry ) {
@@ -171,6 +176,8 @@ function wpforge_save_remote_post_meta( $remote_id, $meta ) {
         }
     }
 
+    add_action( 'update_postmeta', 'wpnfps_update_postmeta', 10, 4 );
+
     do_action( 'wpforge_after_save_remote_post_meta', $remote_id, $meta );
 }
 
@@ -178,7 +185,7 @@ function wpforge_save_remote_post_meta( $remote_id, $meta ) {
  * @param  string[] $image_urls
  * @return int[]
  */
-function wpfnps_sideload_images($image_urls, $post_id ) {
+function wpfnps_sideload_images( $image_urls, $post_id ) {
 
     require_once(ABSPATH . 'wp-admin/includes/media.php');
     require_once(ABSPATH . 'wp-admin/includes/file.php');
@@ -188,22 +195,24 @@ function wpfnps_sideload_images($image_urls, $post_id ) {
 
     $image_ids = array();
 
-    foreach( $image_urls as $image_url ) {
-        $sql    = "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_source_url' AND meta_value = %s";
-        $result =  $wpdb->get_row( $wpdb->prepare( $sql, $image_url ) );
+    if ( is_array( $image_urls ) && ! empty( $image_urls ) ) {
+        foreach( $image_urls as $image_url ) {
+            $sql    = "SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_source_url' AND meta_value = %s";
+            $result =  $wpdb->get_row( $wpdb->prepare( $sql, $image_url ) );
 
-        do {
-            if ( $result ) {
-                $image_ids[] = $result->post_id;
-                break;
-            }
+            do {
+                if ( $result ) {
+                    $image_ids[] = $result->post_id;
+                    break;
+                }
 
-            $image_id = media_sideload_image( $image_url, $post_id, null, 'id' );
+                $image_id = media_sideload_image( $image_url, $post_id, null, 'id' );
 
-            if ( $image_id ) {
-                $image_ids[] = $image_id;
-            }
-        } while ( false );
+                if ( $image_id ) {
+                    $image_ids[] = $image_id;
+                }
+            } while ( false );
+        }
     }
 
     return $image_ids;
