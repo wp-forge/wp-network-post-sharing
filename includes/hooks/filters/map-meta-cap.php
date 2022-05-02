@@ -4,31 +4,25 @@
  *
  * @link https://developer.wordpress.org/reference/hooks/map_meta_cap/
  */
-add_filter( 'map_meta_cap', 'wpfnps_map_meta_cap', 10, 4 );
 
-function wpfnps_map_meta_cap( $caps, $cap, $user_id, $args ) {
+add_filter(
+	'map_meta_cap',
+	function ( $caps, $cap, $user_id, $args ) {
 
-    remove_filter( 'map_meta_cap', 'wpfnps_map_meta_cap' );
+		if ( 'edit_post' === $cap && isset( $args[0] ) ) {
 
-    do {
-        if ( current_user_can( 'create_sites' ) ) {
-            break;
-        }
+			$post_id = $args[0];
 
-        if( in_array( $cap, array( 'edit_post', 'delete_post' ) ) && isset( $args[0] ) ) {
+			if ( get_post_meta( $post_id, '_origin_blog_id' ) ) {
+				// This is a shared listing and therefore is not editable
+				$caps[] = 'do_not_allow';
+			}
 
-            $post_id = $args[0];
+		}
 
-            if( get_post_meta( $post_id, '_origin_blog_id' ) ) {
-                //This is a shared listing and therefore is not editable or trashable
-                $caps[] = 'do_not_allow';
-            }
+		return $caps;
 
-        }
-    } while ( false );
-
-    add_filter( 'map_meta_cap', 'wpfnps_map_meta_cap', 10, 4 );
-
-    return $caps;
-
-}
+	},
+	10,
+	4
+);

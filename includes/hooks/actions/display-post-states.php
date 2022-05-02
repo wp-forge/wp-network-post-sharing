@@ -5,12 +5,12 @@
  */
 add_filter( 'display_post_states', function ( $states, $post ) {
 
-    $maybe = get_post_meta( $post->ID, '_origin_blog_id', 'single' );
+	$maybe = get_post_meta( $post->ID, '_origin_blog_id', 'single' );
 
-    if ( $maybe ) {
-        $states['shared'] = __( 'Shared', 'cirrus' );
-    }
+	if ( $maybe ) {
+		$states['shared'] = __( 'Shared', 'cirrus' );
+	}
 
-    return $states;
+	return $states;
 
 }, 10, 2 );
