@@ -54,17 +54,9 @@ function wpfnps_save_post( $post_id ) {
  */
 function wpfnps_update_post_share( $blog_id, $post_id ) {
 
-	$post      = get_post( $post_id, ARRAY_A );
-	$remote_id = get_post_meta( $post_id, "_remote_share_id_{$blog_id}", 'single' );
-	$post_meta = get_post_meta( $post_id );
-	$post_meta = array_merge( $post_meta, array(
-		'_origin_blog_id'       => array( get_current_blog_id() ),
-		'_origin_share_id'      => array( $post_id ),
-		'_origin_currency_code' => array( get_field( 'currency_code', 'options' ) ),
-	) );
-
-	$post_meta = apply_filters( 'wpforge_save_remote_post_meta', $post_meta, $remote_id, $post_id );
-
+	$post       = get_post( $post_id, ARRAY_A );
+	$remote_id  = get_post_meta( $post_id, "_remote_share_id_{$blog_id}", 'single' );
+	$post_meta  = apply_filters( 'wpforge_save_remote_post_meta', wpfnps_prepare_post_meta( $post_id ), $remote_id, $post_id );
 	$taxonomies = get_object_taxonomies( get_post_type( $post_id ) );
 	$terms      = array();
 
@@ -256,5 +248,28 @@ function wpfnps_share_image_gallery( $image_ids, $remote_site_id, $remote_post_i
 
 		restore_current_blog();
 	}
+
+}
+
+/**
+ * @param  int $post_id
+ * @return array
+ */
+function wpfnps_prepare_post_meta($post_id ) {
+
+    $post_meta = get_post_meta( $post_id );
+    $post_meta = array_merge( $post_meta, array(
+        '_origin_blog_id'       => array( get_current_blog_id() ),
+        '_origin_share_id'      => array( $post_id ),
+        '_origin_currency_code' => array( get_field( 'currency_code', 'options' ) ),
+    ) );
+
+    foreach( $post_meta as $index => $val ) {
+        if( preg_match( '#^_remote_share_id_\d*$#', $index ) ) {
+            unset( $post_meta[ $index ] );
+        }
+    }
+
+    return $post_meta;
 
 }
