@@ -56,7 +56,7 @@ function wpfnps_update_post_share( $blog_id, $post_id ) {
 
 	$post       = get_post( $post_id, ARRAY_A );
 	$remote_id  = get_post_meta( $post_id, "_remote_share_id_{$blog_id}", 'single' );
-	$post_meta  = apply_filters( 'wpforge_save_remote_post_meta', wpfnps_prepare_post_meta( $post_id ), $remote_id, $post_id );
+	$post_meta  = apply_filters( 'wpfnps_save_remote_post_meta', wpfnps_prepare_post_meta( $post_id ), $remote_id, $post_id );
 	$taxonomies = get_object_taxonomies( get_post_type( $post_id ) );
 	$terms      = array();
 
