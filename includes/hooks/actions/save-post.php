@@ -261,7 +261,6 @@ function wpfnps_prepare_post_meta($post_id ) {
     $post_meta = array_merge( $post_meta, array(
         '_origin_blog_id'       => array( get_current_blog_id() ),
         '_origin_share_id'      => array( $post_id ),
-        '_origin_currency_code' => array( get_field( 'currency_code', 'options' ) ),
     ) );
 
     foreach( $post_meta as $index => $val ) {
@@ -269,6 +268,8 @@ function wpfnps_prepare_post_meta($post_id ) {
             unset( $post_meta[ $index ] );
         }
     }
+
+    unset( $post_meta[ '_wpforge_network_post_sharing_share_with' ] );
 
     return $post_meta;
 
