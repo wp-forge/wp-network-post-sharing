@@ -90,14 +90,19 @@ function wpfnps_delete_origin_share_reference( $post_id ) {
 
         switch_to_blog( $shared_from );
 
-        delete_post_meta( $origin_post_id, "_remote_share_id{$site_id}" );
+        delete_post_meta( $origin_post_id, "_remote_share_id_{$site_id}" );
         $shares = wpfnps_get_shares( $origin_post_id );
 
         // Also remove the blog id from the origin list of shares
         if ( is_array( $shares ) ) {
-            remove_action( 'update_postmeta', 'wpnfps_update_postmeta' );
-            update_post_meta( $post_id, '_wpforge_network_post_sharing_share_with', array_diff( $shares, array( $site_id ) ) );
-            add_action( 'update_postmeta', 'wpnfps_update_postmeta', 10, 4 );
+            $index = array_search( $site_id, $shares );
+
+            if ( false !== $index ) {
+                unset( $shares[ $index ] );
+                remove_action( 'update_postmeta', 'wpnfps_update_postmeta' );
+                update_post_meta( $origin_post_id, '_wpforge_network_post_sharing_share_with', $shares );
+                add_action( 'update_postmeta', 'wpnfps_update_postmeta', 10, 4 );
+            }
         }
 
         restore_current_blog();
